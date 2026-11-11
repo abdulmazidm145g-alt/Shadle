@@ -3082,13 +3082,13 @@ $('tip').addEventListener('pointerdown',function(e){if(e.target===$('tip'))close
 
 function startLevel(){
   S.tip=false;tipBusy=false;$('tip').hidden=true;
-  cur=MAKERS[ORDER[S.idx]](diff());if(S.hard&&cur.timeMax){cur.timeMax*=.6;cur.time=cur.timeMax}S.state='play';fx.length=0;hideOv();hud();
+  S.key=ORDER[S.idx];cur=MAKERS[ORDER[S.idx]](diff());if(S.hard&&cur.timeMax){cur.timeMax*=.6;cur.time=cur.timeMax}S.state='play';fx.length=0;hideOv();hud();
   $('tbar').style.visibility=cur.timeMax?'visible':'hidden';
   cv.classList.remove('lvin');void cv.offsetWidth;cv.classList.add('lvin');
   beat();
 }
-function begin(){reorder();S.idx=0;S.round=0;S.lives=3;S.done=0;startLevel()}
-function startScreen(){S.state='idle';showOv('',[{label:'Start',cls:'big',fn:begin}]);beat()}
+function begin(first){reorder();if(typeof first==='string'){var j=ORDER.indexOf(first);if(j>0){var t=ORDER[0];ORDER[0]=ORDER[j];ORDER[j]=t}}S.idx=0;S.round=0;S.lives=3;S.done=0;startLevel()}
+function startScreen(){S.state='idle';showOv('',[{label:'Start',cls:'big',fn:function(){begin()}}]);beat()}
 function onWin(){
   S.state='won';S.wait=1.1;S.gain=100;sfx.win();
   for(var i=0;i<5;i++)burst(rnd(60,300),rnd(180,380),14,COLS[i%6],240);
@@ -3097,7 +3097,7 @@ function onLose(){S.state='lost';S.wait=cur.type==='rope'||cur.type==='whack'||c
 function afterLose(){
   S.state='over';beat();
   if(S.lives>0)showOv('<h2>'+cur.msg+'</h2><p>'+S.lives+(S.lives===1?' life':' lives')+' left</p>',[{label:'Try again',cls:'big',fn:startLevel}]);
-  else showOv('<h2>Game over</h2><p>Start again from the beginning</p>',[{label:'Play again',cls:'big',fn:begin}]);
+  else showOv('<h2>Game over</h2><p>Start again from the beginning</p>',[{label:'Try again',cls:'big',fn:function(){begin(S.key)}}]);
 }
 
 /* input */
