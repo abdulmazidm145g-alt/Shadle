@@ -431,6 +431,13 @@ body.gcmode #gc{display:block}
 .gcard.off::after{opacity:.35}
 #gcerr .gpc{padding-top:26px;align-items:center}
 #gcerr .eb{width:84px;height:84px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:56px;line-height:1;color:#fff;background:radial-gradient(circle at 35% 30%,#ff8a98,#ff4057 55%,#b3162a);box-shadow:0 0 30px rgba(255,64,87,.6);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both,eshake 2.4s ease-in-out 1s infinite}
+#err.custom{gap:18px}
+#err.custom .ebadge{width:124px;height:124px;font-size:84px}
+#err.custom.on .ebadge{box-shadow:0 0 50px rgba(255,64,87,.8),0 0 110px rgba(255,64,87,.4)}
+#err.custom h2{font-size:clamp(32px,9.5vw,44px);letter-spacing:.02em}
+#err.custom p{max-width:330px;width:100%;max-height:44vh;overflow-y:auto;padding:20px 18px;border-radius:28px;font-size:clamp(18px,5.4vw,23px);line-height:1.45;color:#fff;font-weight:800;white-space:pre-wrap;word-break:break-word;
+  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.04) 40%,rgba(255,255,255,.1)),rgba(120,10,28,.45);border:1px solid rgba(255,100,120,.7);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 20px 50px rgba(0,0,0,.7),0 0 46px rgba(255,64,87,.35);-webkit-backdrop-filter:blur(18px) saturate(1.8);backdrop-filter:blur(18px) saturate(1.8)}
 @media (prefers-reduced-motion:reduce){.gcard,.gcard::after,.gcbg i,.gbulb,#gmsg .mb,#gmsg .mi{animation:none!important}}
 </style>
 </head>
@@ -4279,9 +4286,11 @@ function gcSync(d){
   }
   gcTick();
 }
+function errTxt(){var e=$('err');e.classList.toggle('custom',!!S.errMsg);e.querySelector('p').textContent=S.errMsg||"You can't play this moment. Play another one."}
 function gcMsg(d){
   var t=String(d.gcMsg||'').trim(),ty=['error','warning','info','success'].indexOf(d.gcMsgType)>=0?d.gcMsgType:'info',el=$('gmsg'),key=ty+'|'+t;
-  if(!t){el.classList.remove('on');el.setAttribute('data-k','');return}
+  S.errMsg=(ty==='error'&&t)?t:'';
+  if(!t||ty==='error'){el.classList.remove('on');el.setAttribute('data-k','');return}
   if(el.getAttribute('data-k')===key)return;
   el.setAttribute('data-k',key);
   $('gmType').textContent={error:'Error',warning:'Warning',info:'Notice',success:'Success'}[ty];
@@ -4313,17 +4322,19 @@ function updBlock(){
 }
 setInterval(updBlock,250);
 function setMode(m){
-  var old=S.mode;S.mode=m;S.stopped=m!=='run';
+  var old=S.mode;S.mode=m;S.stopped=m!=='run'||!!S.errMsg;
   var map={stop:'done',error:'err',block:'blk',pend:'pnd'};
+  var key=S.errMsg?'err':(map[m]||''),sig=key+'|'+(key==='err'?S.errMsg:'');if(key==='err')errTxt();
   ['done','err','blk','pnd'].forEach(function(id){
-    var el=$(id),on=map[m]===id;
+    var el=$(id),on=key===id;
     if(on){
-      if(old!==m){
+      if(S.scrSig!==sig){
         el.hidden=false;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
         if(id==='done'&&!el.querySelector('.conf'))confetti(el);
       }
     }else{el.hidden=true;el.classList.remove('on')}
   });
+  if(sig!==S.scrSig&&key==='err'&&S.errMsg)sfx.bad();S.scrSig=sig;
   if(S.stopped){var tp=$('tip');tp.hidden=true;tp.classList.remove('on');tp.classList.remove('closing');S.tip=false;tipBusy=false}
   if(m==='block')updBlock();
   beat();
@@ -4351,7 +4362,7 @@ var PK=window.PK={
   nowS:nowS,
   setStopped:function(v){PK.applyControl({mode:v?'stop':'run',difficulty:S.easy?'easy':S.hard?'hard':'medium',gameSet:S.set})},
   info:function(){return{gcGame:(S.gc&&gc.game>=0)?GCG[gc.game].n:'',
-    screen:S.mode==='stop'?'verified':S.mode==='error'?'error':S.mode==='block'?'blocked':S.mode==='pend'?'pending':S.gc?(gc.limit?'limit':'gamec'):S.state==='idle'?'start':S.state==='over'?'gameover':'playing',
+    screen:S.errMsg?'error':S.mode==='stop'?'verified':S.mode==='error'?'error':S.mode==='block'?'blocked':S.mode==='pend'?'pending':S.gc?(gc.limit?'limit':'gamec'):S.state==='idle'?'start':S.state==='over'?'gameover':'playing',
     puzzleNo:S.idx+1,total:ORDER.length,puzzle:ORDER[S.idx],round:S.round+1,lives:S.lives,level:S.easy?'easy':S.hard?'hard':'medium',set:S.set,
     mobile:/Mobi|Android/i.test(navigator.userAgent)
   }}
