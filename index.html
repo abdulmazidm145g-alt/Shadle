@@ -3300,7 +3300,7 @@ function ShootGame(d){
 
 /* ---------- 3. BOUNCE TALES (side-scrolling ball platformer) ---------- */
 function BTaleGame(d){
-  var g=GB('btale','BOUNCE TALES',setup),bx,by,vx,vy,cx,cy,bl,sp,eg,pd,flag,L,got,need,tot,hold={},toast='',tT=0,sq=0;
+  var g=GB('btale','BOUNCE TALES',setup),bx,by,vx,vy,cx,cy,bl,sp,eg,pd,flag,L,got,need,tot,hold={},toast='',tT=0,sq=0,jb={},JX=W/2,JY=488,JR=36,gr=false,jc=1,coy=0,buf=0,pr=0,done=false,flagT=0;
   function setup(s){
     L=[2600,3500,4500][s]+pk3([0,200,400]);bl=[];sp=[];eg=[];pd=[];got=0;
     var x=-120,y=380,i=0,pr=null;bl.push({x:x,w:420,y:y});x+=420;
@@ -3316,24 +3316,42 @@ function BTaleGame(d){
     bl.push({x:x+ri(60,90),w:600,y:y});flag=x+ri(60,90)+260;
     tot=eg.length;need=Math.floor(tot*pk3([.35,.55,.75]));
     bx=40;by=300;vx=0;vy=0;cx=0;cy=by-320;toast='';
-    g.goal='Collect '+need+'+ eggs, reach the flag';
+    gr=false;jc=1;coy=0;buf=0;pr=0;done=false;flagT=0;jb={};
+    g.goal='Collect '+need+'+ eggs, then reach the end';
   }
   setup(0);
-  g.down=function(p){hold[p.id]=p.x<180?-1:1};
+  /* jump: tap = single jump, tap again in the air = double jump (ball never jumps by itself) */
+  function jump(){
+    if(g.status!=='play'||g.bt>0)return;
+    if(gr||coy>0){vy=-520;jc=1;gr=false;coy=0;sfx.tap()}
+    else if(jc<2){vy=-480;jc=2;beep(740,.1,'triangle',.06,1100);burst(bx-cx,by-cy+10,6,'#dfe6ff',90)}
+    else buf=.12;
+  }
+  g.down=function(p){
+    if(Math.hypot(p.x-JX,p.y-JY)<=JR+10){jb[p.id]=1;pr=.14;jump();return}
+    hold[p.id]=p.x<180?-1:1;
+  };
   g.move=function(p){if(hold[p.id]!==undefined)hold[p.id]=p.x<180?-1:1};
-  g.up=function(id){delete hold[id]};
+  g.up=function(id){delete hold[id];delete jb[id]};
   g.step=function(dt){
+    pr=Math.max(0,pr-dt);
     if(g.bt>0){g.bt-=dt;return}
     tT-=dt;sq=Math.max(0,sq-dt);
     var dir=0;for(var k in hold)dir+=hold[k];dir=clamp(dir,-1,1);
     vx+=(dir*185-vx)*Math.min(1,dt*7);
     var ox=bx,oy=by;bx+=vx*dt;
     bl.forEach(function(b){if(by+11>b.y+6&&bx+11>b.x&&bx-11<b.x+b.w){if(ox+11<=b.x+1)bx=b.x-11;else if(ox-11>=b.x+b.w-1)bx=b.x+b.w+11}});
-    vy+=1400*dt;by+=vy*dt;
+    vy+=1400*dt;by+=vy*dt;gr=false;
     if(vy>0)for(var i=0;i<bl.length;i++){var b=bl[i];if(oy+11<=b.y+3&&by+11>=b.y&&bx>b.x-5&&bx<b.x+b.w+5){
       by=b.y-11;var pad=pd.some(function(q){return Math.abs(q.x-bx)<26&&Math.abs(q.y-b.y)<3});
-      vy=pad?-850:-520;sq=.15;sfx.tap();break}}
+      if(pad){vy=-850;jc=1;sq=.15;sfx.tap()}
+      else{if(vy>260){sq=.12;sfx.tap()}vy=0;gr=true;jc=0;coy=.1}
+      break}}
+    if(!gr){if(coy>0)coy-=dt;if(coy<=0&&jc===0)jc=1}
+    if(buf>0){buf-=dt;if(gr){buf=0;jump()}}
     eg.forEach(function(e){if(!e.ok&&Math.hypot(e.x-bx,e.y-by)<20){e.ok=1;got++;sfx.ok();burst(e.x-cx,e.y-cy,6,'#ffd34d',120)}});
+    if(!done&&got>=need){done=true;flagT=0;toast='টাস্ক শেষ! এবার শেষ পয়েন্টে যাও';tT=2.6;sfx.win()}
+    if(done)flagT+=dt;
     sp.forEach(function(s2){if(bx+9>s2.x&&bx-9<s2.x+s2.w&&by+10>s2.y-12&&by-10<s2.y){g.status='lose';g.msg='কাঁটায় লেগেছে!'}});
     if(bx<-100)bx=-100;
     cx+=((bx-140)-cx)*Math.min(1,dt*6);cy+=((by-310)-cy)*Math.min(1,dt*3);
@@ -3352,12 +3370,37 @@ function BTaleGame(d){
     pd.forEach(function(p){var x=p.x+sx,y=p.y+sy;ctx.strokeStyle='#2fb83a';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-16,y);ctx.quadraticCurveTo(x,y-22,x+16,y-6);ctx.stroke();ctx.strokeStyle='#8af07a';ctx.lineWidth=2;ctx.stroke()});
     sp.forEach(function(s2){var x=s2.x+sx,y=s2.y+sy;for(var q=0;q<3;q++){ctx.fillStyle='#dfe6f0';ctx.beginPath();ctx.moveTo(x+q*14,y);ctx.lineTo(x+q*14+7,y-24);ctx.lineTo(x+q*14+14,y);ctx.fill();ctx.fillStyle='#8a96a8';ctx.beginPath();ctx.moveTo(x+q*14+7,y-24);ctx.lineTo(x+q*14+14,y);ctx.lineTo(x+q*14+7,y);ctx.fill()}});
     eg.forEach(function(e,q){if(e.ok)return;var x=e.x+sx,y=e.y+sy+Math.sin(g.t*3+q)*3;if(x<-20||x>W+20)return;ctx.fillStyle='#f3c58a';ctx.beginPath();ctx.ellipse(x,y,9,12,0,0,7);ctx.fill();ctx.fillStyle='#c98a4a';ctx.beginPath();ctx.arc(x-3,y-2,2,0,7);ctx.arc(x+3,y+4,2,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,.6)';ctx.beginPath();ctx.ellipse(x-4,y-5,2,4,-.4,0,7);ctx.fill()});
-    var fx=flag+sx,fy=bl[bl.length-1].y+sy;ctx.fillStyle='#7a4a22';ctx.fillRect(fx,fy-90,5,90);ctx.fillStyle=got>=need?'#2fd07a':'#e0453a';ctx.beginPath();ctx.moveTo(fx+5,fy-90);ctx.lineTo(fx+46,fy-76);ctx.lineTo(fx+5,fy-62);ctx.fill();
+    if(done){var fx=flag+sx,fy=bl[bl.length-1].y+sy,fk=clamp(flagT/.9,0,1),fe=1-Math.pow(1-fk,3),fh=90*fe;
+      if(fx>-70&&fx<W+70){
+        var gl2=ctx.createRadialGradient(fx+2,fy-fh/2,4,fx+2,fy-fh/2,72);gl2.addColorStop(0,'rgba(47,208,122,'+(.45*fe)+')');gl2.addColorStop(1,'rgba(47,208,122,0)');
+        ctx.fillStyle=gl2;ctx.beginPath();ctx.arc(fx+2,fy-fh/2,72,0,7);ctx.fill();
+        ctx.fillStyle='#7a4a22';ctx.fillRect(fx,fy-fh,5,fh);
+        if(fk>.4){var fw=46*clamp((fk-.4)/.6,0,1),wv=Math.sin(g.t*5)*3;ctx.fillStyle='#2fd07a';ctx.beginPath();ctx.moveTo(fx+5,fy-fh);ctx.lineTo(fx+5+fw,fy-fh+14+wv);ctx.lineTo(fx+5,fy-fh+28);ctx.fill()}
+      }
+    }
     var s=sq>0?1+sq*1.6:1,bxx=bx+sx,byy=by+sy;ctx.save();ctx.translate(bxx,byy+11);ctx.scale(1/s,s);ctx.translate(-bxx,-(byy+11));ball(bxx,byy,11,'#e8302d');
     ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(bxx-3,byy-2,3,0,7);ctx.arc(bxx+4,byy-2,3,0,7);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(bxx-2,byy-2,1.4,0,7);ctx.arc(bxx+5,byy-2,1.4,0,7);ctx.fill();ctx.restore();
-    if(tT>0)txt(toast,W/2,150,17,'#fff','#c1121f');
+    if(tT>0)txt(toast,W/2,150,16,'#fff',done?'#0b7a3e':'#c1121f');
+    /* arrow to the end point once the egg task is done */
+    if(done&&flag-cx>W+2){ctx.save();ctx.globalAlpha=.7+.3*Math.sin(g.t*6);ctx.fillStyle='rgba(10,24,18,.78)';rr(W-78,62,68,26,13);ctx.fill();ctx.strokeStyle='#2fd07a';ctx.lineWidth=1.5;rr(W-78,62,68,26,13);ctx.stroke();txt('END',W-55,75.5,12,'#7bf0b0');ctx.fillStyle='#2fd07a';ctx.beginPath();ctx.moveTo(W-30,68);ctx.lineTo(W-20,75);ctx.lineTo(W-30,82);ctx.closePath();ctx.fill();ctx.restore()}
+    /* jump button (middle) */
+    (function(){
+      var x=JX,y=JY,r=pr>0?JR*.92:JR;
+      ctx.save();
+      ctx.shadowColor='rgba(150,90,255,.55)';ctx.shadowBlur=pr>0?10:18;ctx.shadowOffsetY=4;
+      var bg=ctx.createLinearGradient(0,y-r,0,y+r);bg.addColorStop(0,pr>0?'#e8d6ff':'#d6b9ff');bg.addColorStop(.52,'#a97bf2');bg.addColorStop(1,'#8350de');
+      ctx.fillStyle=bg;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+      ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.beginPath();ctx.arc(x,y,r-1,0,7);ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.ellipse(x-r*.18,y-r*.5,r*.55,r*.26,-.35,0,7);ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(x-11,y+1);ctx.lineTo(x,y-10);ctx.lineTo(x+11,y+1);ctx.stroke();
+      txt('JUMP',x,y+17,11,'#fff');
+      ctx.fillStyle=(gr||coy>0)?'#ffd34d':'rgba(255,255,255,.28)';ctx.beginPath();ctx.arc(x-9,y-JR-9,4,0,7);ctx.fill();
+      ctx.fillStyle=jc<2?'#ffd34d':'rgba(255,255,255,.28)';ctx.beginPath();ctx.arc(x+9,y-JR-9,4,0,7);ctx.fill();
+      ctx.restore();
+    })();
     topBar(g);
-    var t2=Object.keys(hold).length===0;if(t2&&g.t<12)instr('বাম/ডান পাশ চেপে ধরো — বল নিজেই লাফায়',540);
+    var t2=Object.keys(hold).length===0;if(t2&&g.t<12)instr('বাম/ডানে চেপে চলো — মাঝের বাটনে লাফ, ২ বার চাপলে ডাবল লাফ',540);
     bnr(g);
   };
   return g;
@@ -3892,7 +3935,7 @@ cliff:['ছেলেটা পাহাড়ের কিনারায় দ
 Object.assign(TIPS,{
 heli:['তুমি লাল হেলিকপ্টার। আঙুল ধরে টানলে হেলিকপ্টার তোমার আঙুলের ওপরে ওপরে চলবে।','গুলি নিজে থেকেই চলে। স্ক্রিনে ট্যাপ করলে মিসাইল ছুটবে (কয়েক সেকেন্ড পর পর)।','ট্যাংক, কামান, জিপ আর শত্রু হেলিকপ্টার ধ্বংস করো। তাদের লাল গুলি এড়িয়ে চলো।','HP শেষ হলে হেরে যাবে। ৩য় লেভেলে শেষে বস আসবে।'],
 hotd:['এটা ফার্স্ট-পারসন শুটিং। জম্বি সামনে থেকে এগিয়ে আসছে।','জম্বির গায়ে ট্যাপ করলে গুলি লাগবে, মাথায় ট্যাপ করলে বেশি ক্ষতি হবে।','৬টা গুলি শেষ হলে নিচের RELOAD জায়গায় ট্যাপ করো।','জম্বি তোমার কাছে পৌঁছালে একটা প্রাণ যাবে। "HELP" লেখা নীল সাধারণ মানুষকে গুলি করো না।'],
-btale:['লাল বল নিজে থেকেই লাফাচ্ছে।','স্ক্রিনের বাম পাশ চেপে ধরলে বাঁয়ে, ডান পাশ চেপে ধরলে ডানে যাবে।','ডিম তুলে নাও, সবুজ পাতায় পড়লে অনেক ওপরে উঠবে। কাঁটা আর গর্ত এড়িয়ে চলো।','দরকারি ডিম তোলা হলে শেষের পতাকায় পৌঁছাও।'],
+btale:['লাল বল আর নিজে থেকে লাফায় না — মাঝের JUMP বাটনে একবার চাপলে একটা লাফ দেবে।','স্ক্রিনের বাম পাশ চেপে ধরলে বাঁয়ে, ডান পাশ চেপে ধরলে ডানে যাবে।','বাতাসে থাকা অবস্থায় আবার বাটনে চাপলে (দুইবার চাপলে) ডাবল লাফ হবে। সবুজ পাতায় পড়লে অনেক ওপরে উঠবে। কাঁটা আর গর্ত এড়িয়ে চলো।','দরকারি ডিম তোলা শেষ হলে শেষ পয়েন্টের পতাকা দেখা যাবে — তখন সেখানে পৌঁছাও।'],
 btrouble:['নিচে তুমি, ওপরে লাল বাবল লাফাচ্ছে।','আঙুল টেনে ডানে-বামে সরো। দড়ি নিজে থেকেই ওপরে ছোটে।','বাবলে দড়ি লাগলে সেটা ভেঙে ছোট দুটো বাবল হবে। সব শেষ করো।','কোনো বাবল তোমার গায়ে লাগলে প্রাণ যাবে।'],
 rash:['তুমি লাল বাইকে। মোট ৮ জন রেসার।','স্ক্রিনে ধরে ডানে-বামে টানলে বাইক বাঁক নেবে।','পাশের বাইকারের কাছে গিয়ে ছোট ট্যাপ করলে ঘুষি মারবে (যেদিকে ট্যাপ করবে সেদিকে)।','রাস্তার গাড়িতে লাগলে বা মার খেলে HP কমে। শেষে নির্দিষ্ট পজিশনের মধ্যে আসতে হবে।'],
 traffic:['হাইওয়েতে তোমার সবুজ গাড়ি নিজে থেকে এগোচ্ছে।','বাঁয়ে বা ডানে সোয়াইপ করো বা স্ক্রিনের বাম/ডান পাশে ট্যাপ করো, লেন বদলে যাবে।','অন্য গাড়িতে ধাক্কা লাগলে HP কমে।','শেষ পর্যন্ত পৌঁছালে লেভেল শেষ।'],
