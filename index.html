@@ -674,8 +674,7 @@ body{background:#000!important;animation:none!important}
         <video id="hVid" muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true"></video>
         <canvas id="gcGlobe" aria-hidden="true"></canvas>
         <div class="hshade"></div>
-        <div class="hslide" id="hSlide"><small id="hNo"></small><b id="hTitle"></b><span id="hDesc"></span></div>
-        <div class="hbar"><i id="hFill"></i></div>
+        <div class="hslide" id="hSlide"><b id="hTitle"></b><span id="hDesc"></span></div>
       </div>
     </div>
     <div class="gmain">
@@ -4696,12 +4695,11 @@ try{
   function edge(){hv.style.clipPath=hv.style.webkitClipPath=poly(0,1.3);rim.style.clipPath=rim.style.webkitClipPath=poly(7,1.3)}
   edge();window.addEventListener('resize',edge);
   var S=[['PK Earth Network','Every city, one connected world'],['PK Octopus AI','Eight arms of intelligence, one brain'],['PK Spectrum Satellite','Signals from orbit, in real time'],['PK Quantum Cloud','Infinite power, zero waiting'],['PK Cyber Shield','Guarding every connection'],['PK Neural Core','Learning faster than ever'],['PK Hyper Link','Speed that bends distance'],['PK Galaxy Radar','Scanning the sky around the clock'],['PK Nova Engine','Ignite your next big idea'],['PK Orbit Vision','See the planet from above']];
-  var no=document.getElementById('hNo'),ti=document.getElementById('hTitle'),de=document.getElementById('hDesc'),fl=document.getElementById('hFill'),cur=-1,t0=0;
-  function show(i){cur=i;var s=S[i];no.textContent=(i<9?'0':'')+(i+1)+' / '+S.length;
-    ti.innerHTML='';s[0].split('').forEach(function(ch,k){var e=document.createElement('i');e.textContent=ch===' '?'\u00a0':ch;e.style.animationDelay=(k*.035)+'s';ti.appendChild(e)});
-    de.textContent=s[1];[no,de].forEach(function(e){e.style.animation='none';void e.offsetWidth;e.style.animation=''});
-    fl.style.animation='none';void fl.offsetWidth;fl.style.animation='';t0=Date.now()}
-  function out(next){ti.classList.add('out');de.classList.add('out');no.classList.add('out');setTimeout(function(){ti.classList.remove('out');de.classList.remove('out');no.classList.remove('out');show(next)},420)}
+  var ti=document.getElementById('hTitle'),de=document.getElementById('hDesc'),cur=-1,t0=0;
+  function show(i){cur=i;var s=S[i];    ti.innerHTML='';s[0].split('').forEach(function(ch,k){var e=document.createElement('i');e.textContent=ch===' '?'\u00a0':ch;e.style.animationDelay=(k*.035)+'s';ti.appendChild(e)});
+    de.textContent=s[1];[de].forEach(function(e){e.style.animation='none';void e.offsetWidth;e.style.animation=''});
+    t0=Date.now()}
+  function out(next){ti.classList.add('out');de.classList.add('out');setTimeout(function(){ti.classList.remove('out');de.classList.remove('out');show(next)},420)}
   show(0);
   setInterval(function(){if(!document.body.classList.contains('gcmode')){t0=Date.now();return}if(Date.now()-t0>=5000-420)out((cur+1)%S.length)},250);
 })();
