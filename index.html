@@ -565,6 +565,31 @@ body{background:#000!important;animation:none!important}
 #gcGlobe{position:absolute;right:0;top:15%;bottom:0;width:60%;height:85%;z-index:3;pointer-events:none;mix-blend-mode:screen;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 38%),linear-gradient(180deg,transparent 0,#000 14%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 38%),linear-gradient(180deg,transparent 0,#000 14%);mask-composite:intersect}
 .gtimer{position:absolute;top:8px;right:10px;z-index:5}
+
+/* ===== v8: torn-edge hero with live globe + PK slideshow ===== */
+#gcHero{position:absolute;left:0;right:0;top:0;height:290px;z-index:4;pointer-events:none}
+.hrim{position:absolute;inset:0;background:#efe6d2;filter:drop-shadow(0 0 10px rgba(0,0,0,.6))}
+.hv{position:absolute;inset:0;background:#02060d;overflow:hidden}
+#gcGlobe{position:absolute;inset:0;width:100%;height:100%;top:0;right:auto;bottom:auto;mix-blend-mode:normal;-webkit-mask-image:none;mask-image:none;display:block}
+.hshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,0) 30%,rgba(0,0,0,.25) 100%),radial-gradient(ellipse 60% 55% at 40% 42%,rgba(0,0,0,.5),transparent 75%)}
+.hslide{position:absolute;left:0;right:0;top:34%;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:0 18px}
+.hslide small{font-size:12px;letter-spacing:.35em;color:rgba(190,225,255,.85);font-weight:600;animation:hfade .6s both}
+.hslide b{display:block;font-size:clamp(28px,8.6vw,38px);font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.1;text-shadow:0 0 30px rgba(110,180,255,.7),0 4px 18px rgba(0,0,0,.8)}
+.hslide b i{display:inline-block;font-style:normal;animation:hchar .7s cubic-bezier(.2,1.3,.4,1) both}
+.hslide span{font-size:14px;color:#cfe3ff;opacity:.9;animation:hfade .8s .45s both}
+.hslide .out,.hslide b.out i{animation:hout .42s ease-in forwards!important}
+@keyframes hchar{from{opacity:0;transform:translateY(22px) scale(.6);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+@keyframes hfade{from{opacity:0;transform:translateY(10px)}to{opacity:.95;transform:none}}
+@keyframes hout{to{opacity:0;transform:translateY(-16px);filter:blur(8px)}}
+.hbar{position:absolute;left:22%;right:22%;top:62%;height:3px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+.hbar i{display:block;height:100%;width:100%;background:#fff;box-shadow:0 0 10px #fff;transform-origin:left;animation:hfill 5s linear infinite}
+@keyframes hfill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.gmain{padding-top:292px}
+.gct{padding-top:0}
+.glist{width:90%;max-width:340px;margin-left:6px}
+.gtimer{z-index:6;top:12px}
+#gcGlobe{z-index:0!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;filter:none!important;box-shadow:none!important;border-radius:0!important;animation:none!important}
+.hshade{z-index:1}.hslide{z-index:3}.hbar{z-index:3;top:26px;left:30%;right:30%}
 </style>
 </head>
 <body class="introing">
@@ -642,7 +667,15 @@ body{background:#000!important;animation:none!important}
 
   <section id="gc" aria-label="Game C">
     <div class="gcbg"><i></i><i></i><i></i></div>
-    <canvas id="gcGlobe" aria-hidden="true"></canvas>
+    <div id="gcHero" aria-label="PK showcase">
+      <div class="hrim" id="hRim"></div>
+      <div class="hv" id="hV">
+        <canvas id="gcGlobe" aria-hidden="true"></canvas>
+        <div class="hshade"></div>
+        <div class="hslide" id="hSlide"><small id="hNo"></small><b id="hTitle"></b><span id="hDesc"></span></div>
+        <div class="hbar"><i id="hFill"></i></div>
+      </div>
+    </div>
     <div class="gmain">
       <div class="gct"><span class="gtag">GAME C</span><h1>Choose your game</h1><p>Tap a game to see how to play</p></div>
       <div class="gtimer" id="gcTimer" hidden><span class="gtl">Time left</span><b id="gcT">05:00</b><button type="button" class="gbulb" id="gcBulb" aria-label="How to play">&#128161;</button></div>
@@ -4615,7 +4648,7 @@ try{
     requestAnimationFrame(frame);
     if(!document.body.classList.contains('gcmode')||t-last<33)return;last=t;
     if(!W)size();
-    var gx=W*.8,gy=H*.5,R=Math.min(W*.74,H*.42),c=Math.cos(yaw),s=Math.sin(yaw);yaw+=.0042;
+    var gx=W*.8,gy=H*1.02,R=Math.max(H*.95,W*.62),c=Math.cos(yaw),s=Math.sin(yaw);yaw+=.0042;
     cx.clearRect(0,0,W,H);
     for(i=0;i<stars.length;i++){var st2=stars[i];cx.fillStyle='rgba(200,225,255,'+(.25+.25*Math.sin(t/700+st2[3]))+')';cx.fillRect(st2[0]*W,st2[1]*H,st2[2]*dpr,st2[2]*dpr)}
     var g1=cx.createRadialGradient(gx-R*.25,gy-R*.2,R*.1,gx,gy,R*1.02);g1.addColorStop(0,'#020a16');g1.addColorStop(.78,'#030c19');g1.addColorStop(.94,'#0a2a55');g1.addColorStop(1,'#3a86e0');
@@ -4635,6 +4668,25 @@ try{
     cx.fillStyle=fg;cx.fillRect(fx-R*.6,fy-R*.6,R*1.2,R*1.2);
   }
   requestAnimationFrame(frame);
+})();
+
+(function(){
+  var hero=document.getElementById('gcHero');if(!hero)return;
+  var rim=document.getElementById('hRim'),hv=document.getElementById('hV');
+  function poly(extra,seed){var pts=['0% 0%','100% 0%'],n=34,i,x,y,h=hero.clientHeight||290;
+    for(i=0;i<=n;i++){x=100-i*(100/n);var base=68+(x<=100?(100-x)*.26:0);var j=(Math.sin(i*7.3+seed)*1.5+Math.sin(i*2.1+seed*2)*1.2);y=(base+j)/100*h+extra;pts.push(x.toFixed(2)+'% '+y.toFixed(1)+'px')}
+    return 'polygon('+pts.join(',')+')'}
+  function edge(){hv.style.clipPath=hv.style.webkitClipPath=poly(0,1.3);rim.style.clipPath=rim.style.webkitClipPath=poly(7,1.3)}
+  edge();window.addEventListener('resize',edge);
+  var S=[['PK Earth Network','Every city, one connected world'],['PK Octopus AI','Eight arms of intelligence, one brain'],['PK Spectrum Satellite','Signals from orbit, in real time'],['PK Quantum Cloud','Infinite power, zero waiting'],['PK Cyber Shield','Guarding every connection'],['PK Neural Core','Learning faster than ever'],['PK Hyper Link','Speed that bends distance'],['PK Galaxy Radar','Scanning the sky around the clock'],['PK Nova Engine','Ignite your next big idea'],['PK Orbit Vision','See the planet from above']];
+  var no=document.getElementById('hNo'),ti=document.getElementById('hTitle'),de=document.getElementById('hDesc'),fl=document.getElementById('hFill'),cur=-1,t0=0;
+  function show(i){cur=i;var s=S[i];no.textContent=(i<9?'0':'')+(i+1)+' / '+S.length;
+    ti.innerHTML='';s[0].split('').forEach(function(ch,k){var e=document.createElement('i');e.textContent=ch===' '?'\u00a0':ch;e.style.animationDelay=(k*.035)+'s';ti.appendChild(e)});
+    de.textContent=s[1];[no,de].forEach(function(e){e.style.animation='none';void e.offsetWidth;e.style.animation=''});
+    fl.style.animation='none';void fl.offsetWidth;fl.style.animation='';t0=Date.now()}
+  function out(next){ti.classList.add('out');de.classList.add('out');no.classList.add('out');setTimeout(function(){ti.classList.remove('out');de.classList.remove('out');no.classList.remove('out');show(next)},420)}
+  show(0);
+  setInterval(function(){if(!document.body.classList.contains('gcmode')){t0=Date.now();return}if(Date.now()-t0>=5000-420)out((cur+1)%S.length)},250);
 })();
 </script>
 </body>
