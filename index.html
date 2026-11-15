@@ -591,6 +591,10 @@ body{background:#000!important;animation:none!important}
 #gcGlobe{z-index:0!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;filter:none!important;box-shadow:none!important;border-radius:0!important;animation:none!important}
 .hshade{z-index:1}.hslide{z-index:3}.hbar{z-index:3;top:26px;left:30%;right:30%}
 #hVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:0}
+.hslide b,.hslide span{will-change:opacity,transform}
+.hslide .out,.hslide b.out i{animation:hout .46s cubic-bezier(.4,0,.6,1) forwards!important}
+.hslide b.out i{animation-delay:0s!important}
+@keyframes hout{from{opacity:1;transform:none;filter:none}to{opacity:0;transform:translateY(-14px);filter:blur(8px)}}
 </style>
 </head>
 <body class="introing">
@@ -4699,9 +4703,11 @@ try{
   function show(i){cur=i;var s=S[i];    ti.innerHTML='';s[0].split('').forEach(function(ch,k){var e=document.createElement('i');e.textContent=ch===' '?'\u00a0':ch;e.style.animationDelay=(k*.035)+'s';ti.appendChild(e)});
     de.textContent=s[1];[de].forEach(function(e){e.style.animation='none';void e.offsetWidth;e.style.animation=''});
     t0=Date.now()}
-  function out(next){ti.classList.add('out');de.classList.add('out');setTimeout(function(){ti.classList.remove('out');de.classList.remove('out');show(next)},420)}
+  var busy=false;
+  function out(next){if(busy)return;busy=true;ti.classList.add('out');de.classList.add('out');
+    setTimeout(function(){ti.classList.remove('out');de.classList.remove('out');show(next);busy=false},460)}
   show(0);
-  setInterval(function(){if(!document.body.classList.contains('gcmode')){t0=Date.now();return}if(Date.now()-t0>=5000-420)out((cur+1)%S.length)},250);
+  setInterval(function(){if(!document.body.classList.contains('gcmode')){t0=Date.now();return}if(!busy&&Date.now()-t0>=5000-460)out((cur+1)%S.length)},250);
 })();
 </script>
 </body>
