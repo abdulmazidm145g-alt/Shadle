@@ -545,6 +545,26 @@ canvas{border-radius:28px;box-shadow:0 0 0 1px var(--edge),0 0 60px rgba(255,255
 #done .bar,#pnd .ibar{background:#1b1b1b}#done .bar i,#pnd .ibar i{background:#fff;box-shadow:0 0 14px #fff}
 #blk .lockt{filter:grayscale(1) brightness(2)}
 @media (prefers-reduced-motion:reduce){:root,body,.btn,.btn.big{animation:none}}
+
+/* ===== v7: no grid lines, compact left cards, live globe on the right ===== */
+body{background:#000!important;animation:none!important}
+#done,.mode{background:radial-gradient(ellipse 70% 38% at 50% 45%,rgba(255,255,255,.1),transparent 70%),#000!important}
+.gcbg i{opacity:0!important}
+#gc{background:#000}
+.gct h1{background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important}
+.gmain{align-items:flex-start;padding:10px 4px 40px 8px}
+.gct{align-items:flex-start;text-align:left;padding:6px 2px 0 6px}
+.gct h1{font-size:26px}.gct p{font-size:13px}
+.glist{width:62%;max-width:250px;margin-left:2px;gap:12px;align-self:flex-start}
+.gcard{min-height:60px;padding:8px 12px;gap:10px;border-radius:22px;background:#000!important;border:1px solid rgba(255,255,255,.14)}
+.gnum{width:36px;height:36px;font-size:15px;border-radius:12px;flex:none}
+.gtx b{font-size:15px}.gtx small{font-size:11px}
+.gar{width:28px;height:28px;font-size:10px}
+.gcard.off::before,.gcard.off::after{display:none!important}
+.gcard.off{opacity:.5}
+#gcGlobe{position:absolute;right:0;top:15%;bottom:0;width:60%;height:85%;z-index:3;pointer-events:none;mix-blend-mode:screen;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 38%),linear-gradient(180deg,transparent 0,#000 14%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 38%),linear-gradient(180deg,transparent 0,#000 14%);mask-composite:intersect}
+.gtimer{position:absolute;top:8px;right:10px;z-index:5}
 </style>
 </head>
 <body class="introing">
@@ -622,6 +642,7 @@ canvas{border-radius:28px;box-shadow:0 0 0 1px var(--edge),0 0 60px rgba(255,255
 
   <section id="gc" aria-label="Game C">
     <div class="gcbg"><i></i><i></i><i></i></div>
+    <canvas id="gcGlobe" aria-hidden="true"></canvas>
     <div class="gmain">
       <div class="gct"><span class="gtag">GAME C</span><h1>Choose your game</h1><p>Tap a game to see how to play</p></div>
       <div class="gtimer" id="gcTimer" hidden><span class="gtl">Time left</span><b id="gcT">05:00</b><button type="button" class="gbulb" id="gcBulb" aria-label="How to play">&#128161;</button></div>
@@ -4299,9 +4320,12 @@ var GCG=[
 {n:'Kings of Fighters 97',plat:'Retrogames',url:'https://www.retrogames.cc/arcade-games/the-king-of-fighters-97-oroshi-plus-2003-bootleg.html',c1:'#ffb02e',c2:'#b3500b',
  how:['পেজ খুললে গেমটা চালু করতে Play বাটনে ক্লিক করুন।','কয়েন ঢোকাতে সাধারণত 5 চাপুন, তারপর 1 চেপে শুরু করুন (না হলে Insert Coin / Start বাটন চাপুন)।','তিনজন যোদ্ধা বেছে নিন। তীর চিহ্ন দিয়ে হাঁটুন, লাফান ও নিচু হোন।','ঘুষি আর লাথির কী-গুলো গেমের ভেতরের Controls বা Settings মেনুতে দেখে নিন।','একজন হারলে পরের যোদ্ধা নামে, তিনজনকেই হারালে হার।']},
 {n:"Zuma's Revenge",plat:'Yandex',url:'https://yandex.com/games/app/zumas-revenge-original-619809?utm_source=game_header_all_games#goog_game_inter',c1:'#a35bff',c2:'#4a1a9a',
- how:['মাউস নাড়িয়ে ব্যাঙটাকে ঘোরান, ক্লিক করলে রঙিন বল ছুটবে।','একই রঙের ৩টা বা তার বেশি বল পাশাপাশি এলে ফেটে যাবে।','সব বল গর্তে পৌঁছানোর আগেই শেষ করতে হবে।','ডান ক্লিক বা স্পেস চাপলে হাতের বল দুটো বদলে যায়।','মাঝে মাঝে আসা পাওয়ার-আপ ছুঁয়ে নিন, ওগুলো বিপদে কাজে লাগে।']}
+ how:['মাউস নাড়িয়ে ব্যাঙটাকে ঘোরান, ক্লিক করলে রঙিন বল ছুটবে।','একই রঙের ৩টা বা তার বেশি বল পাশাপাশি এলে ফেটে যাবে।','সব বল গর্তে পৌঁছানোর আগেই শেষ করতে হবে।','ডান ক্লিক বা স্পেস চাপলে হাতের বল দুটো বদলে যায়।','মাঝে মাঝে আসা পাওয়ার-আপ ছুঁয়ে নিন, ওগুলো বিপদে কাজে লাগে।']},
+{n:'Mostofa Arcade',plat:'RetroGames',url:'https://www.retrogames.cc/arcade-games/cadillacs-dinosaurs-930201-etc.html#',c1:'#ff9a3c',c2:'#8a3b00',
+ how:['গেম খুলে কয়েন ঢোকান, তারপর স্টার্ট চেপে খেলা শুরু করুন।','তীর চিহ্নের কী দিয়ে চরিত্র চালান।','আক্রমণ আর লাফের বাটন চেপে ডাইনোসর আর শত্রুদের হারান।','অস্ত্র বা খাবার পড়ে থাকলে তার ওপর দিয়ে গিয়ে তুলে নিন।','কন্ট্রোল গেমের ভেতরের সেটিংসে দেখে নিতে পারেন।']}
 ];
-var gc={sel:0,game:-1,start:0,secs:300,limit:false,active:-1};
+var gc={sel:0,game:-1,start:0,secs:300,limit:false,act:[],actSig:''};
+function gcOk(i){return !gc.act.length||gc.act.indexOf(i)>=0}
 function lsg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lss(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
 gc.start=0;lss('pk-gc-start',null);
@@ -4328,7 +4352,7 @@ function gcBuild(){
   });
 }
 function gcOpen(i){
-  if(gc.active>=0&&i!==gc.active){gcClose();$('gcerr').hidden=false;sfx.bad();return}
+  if(!gcOk(i)){gcClose();$('gcerr').hidden=false;sfx.bad();return}
   gc.sel=i;var g=GCG[i];
   $('gpTitle').textContent=g.n;$('gpPlat').textContent=g.plat;
   var body=$('gpBody');body.innerHTML='';
@@ -4340,8 +4364,8 @@ $('gcerrX').onclick=function(){$('gcerr').hidden=true;sfx.tap()};
 $('gcerr').addEventListener('pointerdown',function(e){if(e.target===$('gcerr'))$('gcerr').hidden=true});
 function gcActiveApply(){
   var cards=$('gcList').children;
-  for(var i=0;i<cards.length;i++)cards[i].classList.toggle('off',gc.active>=0&&i!==gc.active);
-  if(gc.active>=0&&gc.sel!==gc.active)$('gcpop').hidden=true;
+  for(var i=0;i<cards.length;i++)cards[i].classList.toggle('off',!gcOk(i));
+  if(gc.act.length&&!gcOk(gc.sel))$('gcpop').hidden=true;
 }
 function gcGuide(i){
   var g=GCG[i];if(!g)return;
@@ -4357,7 +4381,7 @@ $('gcBulb').onclick=function(){gcGuide(gc.game>=0?gc.game:gc.sel)};
 $('ggX').onclick=function(){$('gcguide').hidden=true;sfx.page()};
 $('gcguide').addEventListener('pointerdown',function(e){if(e.target===$('gcguide'))$('gcguide').hidden=true});
 $('gpPlay').onclick=function(){
-  if(gc.active>=0&&gc.sel!==gc.active){gcClose();$('gcerr').hidden=false;return}
+  if(!gcOk(gc.sel)){gcClose();$('gcerr').hidden=false;return}
   var g=GCG[gc.sel];
   gc.game=gc.sel;lss('pk-gc-game',String(gc.sel));
   sfx.go();gcClose();gcTick();beat();
@@ -4373,8 +4397,9 @@ function gcTick(){
 setInterval(gcTick,250);
 function gcLeave(){gc.limit=false;gcClose();$('gcguide').hidden=true}
 function gcSync(d){
-  var av=(d.gcActive===undefined||d.gcActive===null||d.gcActive==='')?-1:+d.gcActive;if(!(av>=0&&av<GCG.length))av=-1;
-  if(av!==gc.active){gc.active=av;gcActiveApply()}
+  var arr=Array.isArray(d.gcSel)?d.gcSel:((d.gcActive!==undefined&&d.gcActive!==null&&d.gcActive!==''&&+d.gcActive>=0)?[+d.gcActive]:[]);
+  arr=arr.map(Number).filter(function(n,k,a){return n>=0&&n<GCG.length&&a.indexOf(n)===k}).sort();
+  var sg=arr.join(',');if(sg!==gc.actSig){gc.act=arr;gc.actSig=sg;gcActiveApply()}
   var r=d.gcReset!==undefined?String(d.gcReset):'',seen=lsg('pk-gc-reset');
   if(seen!==r){
     if(seen!==null){gc.start=0;gc.game=-1;lss('pk-gc-start',null);lss('pk-gc-game',null);gcClose();$('gcguide').hidden=true}
@@ -4570,6 +4595,47 @@ try{
   },function(e){console.warn('clock',e)});
   window.PK.beatHook(window.PK.info());
 }catch(e){console.warn('Firestore not available, running standalone.',e)}
+
+(function(){
+  var cv=document.getElementById('gcGlobe');if(!cv)return;var cx=cv.getContext('2d'),W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,1.6);
+  var pts=[],cities=[],arcs=[],stars=[],yaw=0,last=0,i,k;
+  function rnd(a,b){return a+Math.random()*(b-a)}
+  function sph(lat,lon){var c=Math.cos(lat);return [c*Math.sin(lon),Math.sin(lat),c*Math.cos(lon)]}
+  for(i=0;i<22;i++){var la=rnd(-.9,1.1),lo=rnd(0,6.28);cities.push([la,lo]);
+    var n=rnd(10,26)|0;for(k=0;k<n;k++){var p=sph(la+rnd(-.17,.17),lo+rnd(-.2,.2));pts.push({v:p,s:rnd(.6,1.7),t:rnd(0,6.28)})}}
+  for(i=0;i<70;i++)stars.push([Math.random(),Math.random(),rnd(.4,1.2),rnd(0,6.28)]);
+  var nb=[];for(i=0;i<pts.length;i++){nb[i]=[];for(k=i+1;k<pts.length&&nb[i].length<2;k++){var a=pts[i].v,b=pts[k].v,d=(a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]);if(d<.02)nb[i].push(k)}}
+  function newArc(){var a=cities[Math.random()*cities.length|0],b=cities[Math.random()*cities.length|0];return {a:sph(a[0],a[1]),b:sph(b[0],b[1]),t:0,sp:rnd(.004,.009)}}
+  for(i=0;i<7;i++){var A=newArc();A.t=Math.random();arcs.push(A)}
+  function size(){var r=cv.getBoundingClientRect();W=cv.width=Math.max(2,r.width*dpr|0);H=cv.height=Math.max(2,r.height*dpr|0)}
+  window.addEventListener('resize',size);
+  var tilt=.42,ct=Math.cos(tilt),st=Math.sin(tilt);
+  function rot(v,c,s){var x=v[0]*c+v[2]*s,z=-v[0]*s+v[2]*c,y=v[1];return [x,y*ct-z*st,y*st+z*ct]}
+  function frame(t){
+    requestAnimationFrame(frame);
+    if(!document.body.classList.contains('gcmode')||t-last<33)return;last=t;
+    if(!W)size();
+    var gx=W*.8,gy=H*.5,R=Math.min(W*.74,H*.42),c=Math.cos(yaw),s=Math.sin(yaw);yaw+=.0042;
+    cx.clearRect(0,0,W,H);
+    for(i=0;i<stars.length;i++){var st2=stars[i];cx.fillStyle='rgba(200,225,255,'+(.25+.25*Math.sin(t/700+st2[3]))+')';cx.fillRect(st2[0]*W,st2[1]*H,st2[2]*dpr,st2[2]*dpr)}
+    var g1=cx.createRadialGradient(gx-R*.25,gy-R*.2,R*.1,gx,gy,R*1.02);g1.addColorStop(0,'#020a16');g1.addColorStop(.78,'#030c19');g1.addColorStop(.94,'#0a2a55');g1.addColorStop(1,'#3a86e0');
+    cx.fillStyle=g1;cx.beginPath();cx.arc(gx,gy,R,0,6.283);cx.fill();
+    var g2=cx.createRadialGradient(gx,gy,R*.96,gx,gy,R*1.22);g2.addColorStop(0,'rgba(80,160,255,.55)');g2.addColorStop(1,'rgba(40,100,220,0)');
+    cx.fillStyle=g2;cx.beginPath();cx.arc(gx,gy,R*1.22,0,6.283);cx.fill();
+    var P=[];
+    for(i=0;i<pts.length;i++){var q=rot(pts[i].v,c,s);P[i]=q;if(q[2]>0){var a=.35+.65*q[2];cx.fillStyle='rgba(200,230,255,'+(a*(.55+.45*Math.sin(t/500+pts[i].t)))+')';cx.beginPath();cx.arc(gx+q[0]*R,gy-q[1]*R,pts[i].s*dpr,0,6.283);cx.fill()}}
+    cx.lineWidth=.7*dpr;cx.strokeStyle='rgba(150,205,255,.28)';cx.beginPath();
+    for(i=0;i<pts.length;i++){if(P[i][2]<=0)continue;for(k=0;k<nb[i].length;k++){var o=P[nb[i][k]];if(o[2]<=0)continue;cx.moveTo(gx+P[i][0]*R,gy-P[i][1]*R);cx.lineTo(gx+o[0]*R,gy-o[1]*R)}}cx.stroke();
+    for(i=0;i<arcs.length;i++){var A=arcs[i];A.t+=A.sp;if(A.t>1.25){arcs[i]=newArc();continue}
+      cx.strokeStyle='rgba(190,225,255,.55)';cx.lineWidth=1*dpr;cx.beginPath();var on=false,head=Math.min(A.t,1),tail=Math.max(0,A.t-.5);
+      for(var u=tail;u<=head;u+=.025){var m=[A.a[0]*(1-u)+A.b[0]*u,A.a[1]*(1-u)+A.b[1]*u,A.a[2]*(1-u)+A.b[2]*u],l=Math.hypot(m[0],m[1],m[2])||1,h=1+.22*Math.sin(Math.PI*u);m=[m[0]/l*h,m[1]/l*h,m[2]/l*h];var q2=rot(m,c,s);
+        if(q2[2]>-.15||Math.hypot(q2[0],q2[1])>1){var X=gx+q2[0]*R,Y=gy-q2[1]*R;if(!on){cx.moveTo(X,Y);on=true}else cx.lineTo(X,Y)}else on=false}
+      cx.stroke()}
+    var fx=gx-R*.72,fy=gy-R*.55,fg=cx.createRadialGradient(fx,fy,0,fx,fy,R*.55);fg.addColorStop(0,'rgba(235,248,255,.95)');fg.addColorStop(.12,'rgba(130,200,255,.55)');fg.addColorStop(1,'rgba(40,110,255,0)');
+    cx.fillStyle=fg;cx.fillRect(fx-R*.6,fy-R*.6,R*1.2,R*1.2);
+  }
+  requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
